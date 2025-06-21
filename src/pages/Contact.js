@@ -26,7 +26,8 @@ const Contact = () => {
   const sendEmail = (e) => {
     e.preventDefault();
     if (emailError || nameError || messageError) return;
-    fetch(`${process.env.EMAIL_API_CALL}/v1/send-email`, {
+    console.log("Sending email...", process.env.REACT_APP_EMAIL_API_CALL);
+    fetch(`${process.env.REACT_APP_EMAIL_API_CALL}/v1/send-email`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
