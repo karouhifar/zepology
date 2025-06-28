@@ -54,6 +54,7 @@ const Contact = () => {
         });
       })
       .catch((error) => {
+        console.log("Error sending email:", error);
         MySwal.fire({
           title: "Error",
           text: "There was an error sending your message. Please try again later.",
