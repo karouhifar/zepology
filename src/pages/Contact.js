@@ -27,17 +27,19 @@ const Contact = () => {
     e.preventDefault();
     if (emailError || nameError || messageError) return;
     console.log("Sending email...", process.env.REACT_APP_EMAIL_API_CALL);
+    const data = JSON.stringify({
+      fromKey: "client_1",
+      name: name,
+      recipient: email,
+      message: message,
+    });
+    console.log("data", data);
     fetch(`${process.env.REACT_APP_EMAIL_API_CALL}/v1/send-email`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({
-        fromKey: "client_1",
-        name: name,
-        recipient: email,
-        message: message,
-      }),
+      body: data,
     })
       .then((response) => {
         if (!response.ok) {
