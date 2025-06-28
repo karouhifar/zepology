@@ -23,52 +23,67 @@ const Contact = () => {
   const [nameError, setNameError] = useState(false);
   const [messageError, setMessageError] = useState(false);
 
-  const sendEmail = (e) => {
+  const sendEmail = async (e) => {
     e.preventDefault();
+
+    // don’t proceed if any validation error
     if (emailError || nameError || messageError) return;
-    console.log("Sending email...", process.env.REACT_APP_EMAIL_API_CALL);
-    const data = JSON.stringify({
-      fromKey: "client_1",
-      name: name,
-      recipient: email,
-      message: message,
-    });
-    console.log("data", data);
-    fetch(`${process.env.REACT_APP_EMAIL_API_CALL}/v1/send-email`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: data,
-    })
-      .then((response) => {
-        if (!response.ok) {
-          throw new Error("Network response was not ok");
+
+    try {
+      console.log("Sending email to:", process.env.REACT_APP_EMAIL_API_CALL);
+
+      // fire off the request
+      const response = await fetch(
+        `${process.env.REACT_APP_EMAIL_API_CALL}/v1/send-email`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            fromKey: "client_1",
+            name,
+            recipient: email,
+            message,
+          }),
         }
-        return response.json();
-      })
-      .then(() => {
-        MySwal.fire({
-          title: "Success",
-          text: "Your message has been sent successfully!",
-          icon: "success",
-          confirmButtonText: "Close",
-        });
-      })
-      .catch((error) => {
-        console.log("Error sending email:", error);
-        MySwal.fire({
-          title: "Error",
-          text: "There was an error sending your message. Please try again later.",
-          icon: "error",
-          confirmButtonColor: "#000",
-        });
+      );
+
+      // try to get JSON payload even on error
+      let payload = null;
+      try {
+        payload = await response.json();
+      } catch {
+        /* ignore parse errors */
+      }
+
+      // if we got a non-2xx status, pull out the real message
+      if (!response.ok) {
+        const errMsg =
+          (payload && (payload.message || payload.error)) ||
+          `HTTP ${response.status} ${response.statusText}`;
+        throw new Error(errMsg);
+      }
+
+      // success alert
+      await MySwal.fire({
+        title: "Success",
+        text: "Your message has been sent successfully!",
+        icon: "success",
+        confirmButtonText: "Close",
       });
 
-    if (!emailError) {
+      // reset your form fields
       setName("");
       setEmail("");
       setMessage("");
+    } catch (err) {
+      console.error("Error sending email:", err);
+
+      await MySwal.fire({
+        title: "Error",
+        text: err.message || "There was an error sending your message.",
+        icon: "error",
+        confirmButtonText: "Close",
+      });
     }
   };
 
