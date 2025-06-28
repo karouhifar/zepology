@@ -30,8 +30,6 @@ const Contact = () => {
     if (emailError || nameError || messageError) return;
 
     try {
-      console.log("Sending email to:", process.env.REACT_APP_EMAIL_API_CALL);
-
       // fire off the request
       const response = await fetch(
         `${process.env.REACT_APP_EMAIL_API_CALL}/v1/send-email`,
